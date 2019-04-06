@@ -40,13 +40,10 @@ public interface Display2D
 
 	//STATE CONTROL METHODS
 
-	//initialises the display to a "blank" state with the given width and height (in pixels) on the parent display
+	//initialises the display to a "blank" state and sets the resolution to the given width and height (in pixels) on the parent display
 	public void init(int width, int height);
 
-	//initialises the display to a "blank" state with the given width and height (in pixels) at the given coordinates on the parent display
-	public void init(int x, int y, int width, int height);
-
-	//initialises the display with its current location and size and sets it to a "blank" state where nothing is considered to have been drawn in the current frame
+	//initialises the display with its current resolution and sets it to a "blank" state where nothing is considered to have been drawn in the current frame
 	public void init();
 
 	//ensures the display is visible on the parent display and updates what is graphically shown on the part of the display intended to be drawn on to the current state of the canvas.

@@ -214,17 +214,8 @@ public class DrawFrame extends JFrame implements Display2D
 	//the frames resolution is set to the size in pixels of the frame (ie space within borders is as seen on screen until the frame is resized).
 	public void init(int width, int height)
 	{
-		this.setSize(width, height);
-		init();
-	}
-
-	//sets the frame as the given size at the given pixel offset from the top left of the screen 
-	//then initializes the canvas (ie the space inside the borders) to be drawn to.
-	//the frames resolution is set to the size in pixels of the frame (ie space within borders is as seen on screen until the frame is resized).
-	public void init(int x, int y, int width, int height)
-	{
-		this.setLocation(x, y);
-		this.setSize(width, height);
+		Insets insets = getInsets();
+		this.setSize(insets.left + width, insets.top + height);
 		init();
 	}
 
