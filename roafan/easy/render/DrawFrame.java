@@ -22,7 +22,6 @@ public class DrawFrame extends JFrame implements Display2D
 	private Color eraseColor = Color.WHITE;
 
 	private boolean drawSuccessful = false;
-	private boolean drawing = false;
 
 	//overridden method from parent class
 	//sets the frame to delete itself when the red X is clicked (exiting the program only if there are no other running threads).
