@@ -22,6 +22,7 @@ public class DrawFrame extends JFrame implements Display2D
 	private Color eraseColor = Color.WHITE;
 
 	private boolean drawSuccessful = false;
+	private boolean drawing = false;
 
 	//overridden method from parent class
 	//sets the frame to delete itself when the red X is clicked (exiting the program only if there are no other running threads).
@@ -44,7 +45,7 @@ public class DrawFrame extends JFrame implements Display2D
 		if(canvas == null)
 		{
 			canvas = new BufferedImage(getBorderedWidth(), getBorderedHeight(), BufferedImage.TYPE_INT_RGB);
-			clear();
+			init();
 		}
 	}
 
@@ -139,34 +140,55 @@ public class DrawFrame extends JFrame implements Display2D
 
 	//returns a graphics object that represents the space inside the borders of the window and which can be drawn to
 	public Graphics2D getDrawGraphics()
-	{		
-		checkInitialized();
+	{
+		if(getBorderedWidth() > 0 && getBorderedHeight() > 0)
+		{
+			checkInitialized();
+		}
 		if(canvas != null)
 		{
 			return canvas.createGraphics();
 		}
 		else
 		{
-			throw new RuntimeException("cannot initialize frame");
+			return null;
 		}
 	}
 
 	//clears the drawable section of the frame(ie paints over the current canvas with the erase color)
-	public void clear()
+	public void init()
 	{
+		if(canvas != null && ((canvas.getWidth() != getBorderedWidth()) || (canvas.getHeight() != getBorderedHeight())))
+		{
+			canvas = null;
+		}
 		Graphics2D g = getDrawGraphics();
-		g.setColor(eraseColor);
-		g.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
+		if(g == null)
+		{
+			drawSuccessful = false;
+		}
+		else
+		{
+			g.setColor(eraseColor);
+			g.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
+			drawSuccessful = true;
+		}
 	}
 
 	//visually updates the frame to show the current state of the canvas
 	public void display()
 	{
-		if(drawSuccess())
+		try{
+			if(drawSuccess())
+			{
+				ensureDisplayable();
+				getBufferStrategy().getDrawGraphics().drawImage(canvas, getBorderedX(), getBorderedY(), getBorderedWidth(), getBorderedHeight(), this);
+				getBufferStrategy().show();
+			}
+		}
+		catch(Exception e)
 		{
-			ensureDisplayable();
-			getBufferStrategy().getDrawGraphics().drawImage(canvas, getBorderedX(), getBorderedY(), getBorderedWidth(), getBorderedHeight(), this);
-			getBufferStrategy().show();
+			//window closed during display;
 		}
 	}
 
@@ -175,12 +197,18 @@ public class DrawFrame extends JFrame implements Display2D
 	//if the frame is resized.
 	public void drawRenderedImage(RenderedImage image, int x, int y)
 	{
-		getDrawGraphics().drawRenderedImage(image, AffineTransform.getTranslateInstance(x,y));
+		if(drawSuccessful)
+		{
+			getDrawGraphics().drawRenderedImage(image, AffineTransform.getTranslateInstance(x,y));
+		}
 	}
 
 	public void drawRenderedImage(RenderedImage image, AffineTransform transform)
 	{
-		getDrawGraphics().drawRenderedImage(image, transform);
+		if(drawSuccessful)
+		{
+			getDrawGraphics().drawRenderedImage(image, transform);
+		}
 	}
 
 	//sets the frame as the given size then initializes the canvas (ie the space inside the borders) to be drawn to.
@@ -188,8 +216,7 @@ public class DrawFrame extends JFrame implements Display2D
 	public void init(int width, int height)
 	{
 		this.setSize(width, height);
-		clear();
-		drawSuccessful = true;
+		init();
 	}
 
 	//sets the frame as the given size at the given pixel offset from the top left of the screen 
@@ -199,8 +226,7 @@ public class DrawFrame extends JFrame implements Display2D
 	{
 		this.setLocation(x, y);
 		this.setSize(width, height);
-		clear();
-		drawSuccessful = true;
+		init();
 	}
 
 	public boolean drawSuccess()
