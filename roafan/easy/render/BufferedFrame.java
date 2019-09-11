@@ -25,6 +25,9 @@ public class BufferedFrame extends JFrame implements Display2D
 	private int drawWidth;
 	private int drawHeight;
 
+	private int bufferCount = 3;
+	private boolean bCountChanged = true;
+
 	//overridden method from parent class
 	//sets the frame to delete itself when the red X is clicked (exiting the program only if there are no other running threads).
 	protected void frameInit()
@@ -40,10 +43,17 @@ public class BufferedFrame extends JFrame implements Display2D
 			setVisible(true);
 		}
 
-		if(getBufferStrategy() == null)
+		if(getBufferStrategy() == null || bCountChanged)
 		{
-			createBufferStrategy(3);
+			createBufferStrategy(bufferCount);
+			bCountChanged = false;
 		}
+	}
+
+	public setBufferCount(int bCount)
+	{
+		bufferCount = bCount;
+		bCountChanged = true;
 	}
 	
 	//returns the x value for the pixels on the left most line of the canvas
