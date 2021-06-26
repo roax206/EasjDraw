@@ -1,5 +1,6 @@
 package roafan.easy.render;
 import roafan.api.Display2D;
+import roafan.api.DisposeListener;
 import javax.swing.JFrame;
 import java.awt.Graphics2D;
 import java.awt.Graphics;
@@ -12,6 +13,9 @@ import java.io.PrintStream;
 import java.awt.geom.AffineTransform;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentAdapter;
+import java.awt.Point;
+import java.util.LinkedList;
+import javax.swing.SwingUtilities;
 
 //DrawFrame: a sub class of java's swing JFrame designed for ease of use and quick implementation of 2D graphics
 public class BufferedFrame extends JFrame implements Display2D
@@ -26,7 +30,9 @@ public class BufferedFrame extends JFrame implements Display2D
 	private int drawHeight;
 
 	private int bufferCount = 3;
-	private boolean bCountChanged = true;
+	private boolean bCountChanged = false;
+
+	private LinkedList<DisposeListener> dspListeners = new LinkedList<DisposeListener>();
 
 	//overridden method from parent class
 	//sets the frame to delete itself when the red X is clicked (exiting the program only if there are no other running threads).
@@ -36,6 +42,12 @@ public class BufferedFrame extends JFrame implements Display2D
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 	}
 
+	public void setBufferCount(int count)
+	{
+		bufferCount = count;
+		bCountChanged = true;
+	}
+
 	private void ensureDisplayable()
 	{
 		if(isVisible() == false)
@@ -43,17 +55,11 @@ public class BufferedFrame extends JFrame implements Display2D
 			setVisible(true);
 		}
 
-		if(getBufferStrategy() == null || bCountChanged)
+		if(bCountChanged || getBufferStrategy() == null)
 		{
 			createBufferStrategy(bufferCount);
 			bCountChanged = false;
 		}
-	}
-
-	public setBufferCount(int bCount)
-	{
-		bufferCount = bCount;
-		bCountChanged = true;
 	}
 	
 	//returns the x value for the pixels on the left most line of the canvas
@@ -91,6 +97,13 @@ public class BufferedFrame extends JFrame implements Display2D
 	{
 		return canvas.getDrawHeight();
 	}
+	
+	public Point getLocalCoordinate(Point point)
+	{
+		Point localPoint = (Point)point.clone();
+		SwingUtilities.convertPointFromScreen(localPoint, canvas);
+		return canvas.scalePointByResolution(localPoint);
+	}
 
 	//returns a graphics object that represents the space inside the borders of the window and which can be drawn to
 	public Graphics2D getDrawGraphics()
@@ -114,6 +127,7 @@ public class BufferedFrame extends JFrame implements Display2D
 		catch(Exception e)
 		{
 			//window closed during display;
+			//stdOut.println("trouble displaying frame");
 		}
 	}
 
@@ -135,7 +149,6 @@ public class BufferedFrame extends JFrame implements Display2D
 	
 	public void paint(Graphics g)
 	{
-		stdOut.println("painted");
 		super.paint(g);
 	}
 
@@ -168,5 +181,19 @@ public class BufferedFrame extends JFrame implements Display2D
 	public boolean drawSuccess()
 	{
 		return true;
+	}
+
+	public void addDisposeListener(DisposeListener listener)
+	{
+		dspListeners.add(listener);
+	}
+
+	public void dispose()
+	{
+		for(DisposeListener l: dspListeners)
+		{
+			l.notifyDisposed();
+		}
+		super.dispose();
 	}
 }

@@ -1,6 +1,8 @@
 package roafan.api;
 import java.awt.image.RenderedImage;
 import java.awt.geom.AffineTransform;
+import java.awt.Graphics2D;
+import java.awt.Point;
 
 public interface Display2D
 {
@@ -26,15 +28,21 @@ public interface Display2D
 	//gets the y value of the top most row of pixels that are intended to be drawn on
 	public int getMaxDrawY();
 
+	//return the point on screen relative to the displays internal resolution/canvas
+	public Point getLocalCoordinate(Point point);
+
 
 
 	//DRAWING METHODS
 
-	//draws a RenderedImage transformed by the given AffineTransform onto the display
+	//draws a RenderedImage transformed by the given AffineTransform onto the display.
 	public void drawRenderedImage(RenderedImage image, AffineTransform transform);
 
-	//draws a RenderedImage at the given location on the display
+	//draws a RenderedImage at the given location on the display.
 	public void drawRenderedImage(RenderedImage image, int x, int y);
+
+	//returns the Graphics2D object that will allow RenderedImages to be drawn to this display (where the drawing is controlled by the image being drawn).
+	public Graphics2D getDrawGraphics();
 
 
 
@@ -53,4 +61,13 @@ public interface Display2D
 	//returns whether the current frame is valid. This returns false if the state of the display was changed such that subsequent draws or displays may be incompatible
 	//with the display's previous state (such as when the display resolution was changed mid frame).
 	public boolean drawSuccess();
+
+	//returns whether or not the user can see the content of the display
+	public boolean isVisible();
+
+	//allows objects to be notified when the display is permanently disposed
+	public void addDisposeListener(DisposeListener listener);
+
+	//returns true if the display has the active focus of the user or false otherwise (i.e. if the display is minimised or a different window is selected).
+	public boolean isFocusOwner();
 }

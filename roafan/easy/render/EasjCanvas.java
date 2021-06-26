@@ -8,6 +8,7 @@ import java.awt.Color;
 import java.awt.geom.AffineTransform;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentAdapter;
+import java.awt.Point;
 public class EasjCanvas extends JPanel
 {
 	//the width and height of the canvas of this canvas component such that they may be held when the canvas is null
@@ -75,7 +76,18 @@ public class EasjCanvas extends JPanel
 	
 	public void paint(Graphics g)
 	{
-		System.out.println("child painted");
 		g.drawImage(canvas, 0, 0, getWidth() - 1, getHeight() - 1, 0, 0, canvas.getWidth(), canvas.getHeight(), null);
+	}
+	
+	public Point scalePointByResolution(Point point)
+	{
+		if(drawWidth == 0 || drawHeight == 0 || getWidth() == 0 || getHeight() == 0)
+		{
+			return null;
+		}
+		double xScale = (double)drawWidth/getWidth();
+		double yScale = (double)drawHeight/getHeight();
+		
+		return new Point((int)(point.getX()*xScale), (int)(point.getY()*yScale));
 	}
 }
